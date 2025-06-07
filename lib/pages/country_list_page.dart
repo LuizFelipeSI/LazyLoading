@@ -22,7 +22,7 @@ class _CountryListPageState extends State<CountryListPage> {
 
   Future<void> _fetchCountries() async {
     final response =
-        await http.get(Uri.parse('https://restcountries.com/v3.1/all'));
+        await http.get(Uri.parse('https://restcountries.com/v3.1/independent?status=true&fields=capital,name,flags,population,region,currencies,png'));
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
       setState(() {
