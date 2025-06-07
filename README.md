@@ -1,16 +1,13 @@
-# paizes
+## Prints do Aplicativo
 
-A new Flutter project.
+### Primeira lista de países
+![Primeira lista de países](https://github.com/user-attachments/assets/d69c0ea5-dc4e-4626-8b9a-484f3f9ba498)
 
-## Getting Started
+### Navegando entre as listas
+![Navegando entre as listas](https://github.com/user-attachments/assets/7b81f3a9-9628-4877-be6c-e8a094a8d5ee)
 
-This project is a starting point for a Flutter application.
+### Detalhes dos países
+![Detalhes dos países](https://github.com/user-attachments/assets/67a036a7-2aee-48a7-a394-717b20a4473b)
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Rodando os testes
+![Rodando os testes](https://github.com/user-attachments/assets/92b0902a-8ca5-4f6a-8a79-6f7ae0645080)
