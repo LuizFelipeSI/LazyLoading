@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../models/country.dart';
+import '../services/pais_service.dart';
 import 'country_detail_page.dart';
 
 class CountryListPage extends StatefulWidget {
@@ -13,6 +13,9 @@ class _CountryListPageState extends State<CountryListPage> {
   List<Country> _allCountries = [];
   int _currentPage = 0;
   final int _perPage = 10;
+  final PaisService _paisService = PaisService(client: http.Client());
+  bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -21,15 +24,16 @@ class _CountryListPageState extends State<CountryListPage> {
   }
 
   Future<void> _fetchCountries() async {
-    final response =
-        await http.get(Uri.parse('https://restcountries.com/v3.1/independent?status=true&fields=capital,name,flags,population,region,currencies,png'));
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonData = json.decode(response.body);
+    try {
+      final countries = await _paisService.listarPaises();
       setState(() {
-        _allCountries = jsonData
-            .map((countryJson) => Country.fromJson(countryJson))
-            .toList();
-        _allCountries.sort((a, b) => a.name.compareTo(b.name));
+        _allCountries = countries;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Erro ao carregar países: ${e.toString()}';
+        _isLoading = false;
       });
     }
   }
@@ -62,79 +66,81 @@ class _CountryListPageState extends State<CountryListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Países do Mundo'),
-        centerTitle: true,
-      ),
-      body: _allCountries.isEmpty
+      appBar: AppBar(title: Text('Países do Mundo'), centerTitle: true),
+      body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _pagedCountries.length,
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    itemBuilder: (context, index) {
-                      final country = _pagedCountries[index];
-                      return Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+          : _errorMessage != null
+              ? Center(child: Text(_errorMessage!))
+              : Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: _pagedCountries.length,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
                         ),
-                        elevation: 3,
-                        margin: EdgeInsets.symmetric(vertical: 8),
-                        child: ListTile(
-                          contentPadding: EdgeInsets.all(12),
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: Image.network(
-                              country.flagUrl,
-                              width: 60,
-                              height: 40,
-                              fit: BoxFit.cover,
+                        itemBuilder: (context, index) {
+                          final country = _pagedCountries[index];
+                          return Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                          ),
-                          title: Text(
-                            country.name,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => CountryDetailPage(country),
+                            elevation: 3,
+                            margin: EdgeInsets.symmetric(vertical: 8),
+                            child: ListTile(
+                              contentPadding: EdgeInsets.all(12),
+                              leading: ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: Image.network(
+                                  country.flagUrl,
+                                  width: 60,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: _previousPage,
-                        icon: Icon(Icons.arrow_back),
-                        label: Text('Anteriores'),
+                              title: Text(
+                                country.name,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => CountryDetailPage(country),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
                       ),
-                      Text('Página ${_currentPage + 1}',
-                          style: TextStyle(fontSize: 16)),
-                      ElevatedButton.icon(
-                        onPressed: _nextPage,
-                        icon: Icon(Icons.arrow_forward),
-                        label: Text('Próximos'),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ElevatedButton(
+                            onPressed: _previousPage,
+                            child: Text('Anteriores'),
+                          ),
+                          Text(
+                            'Página ${_currentPage + 1}',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          ElevatedButton(
+                            onPressed: _nextPage,
+                            child: Text('Próximos'),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
     );
   }
 }
