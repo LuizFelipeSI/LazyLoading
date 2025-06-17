@@ -1,0 +1,7 @@
+targets:
+  $default:
+    builders:
+      mockito:
+        generate_for:
+          - test/widget_test.dart
+          - test/country_test.dart  # Adicione outros arquivos de teste se necessário

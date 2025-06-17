@@ -4,62 +4,54 @@ import '../models/country.dart';
 class CountryDetailPage extends StatelessWidget {
   final Country country;
 
-  CountryDetailPage(this.country);
+  const CountryDetailPage(this.country, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(country.name),
-        centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          key: const Key('country_detail_column'),
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+            SizedBox(
+              width: 200,
+              height: 120,
               child: Image.network(
                 country.flagUrl,
-                width: 200,
-                height: 120,
-                fit: BoxFit.cover,
+                key: const Key('country_flag_image'),
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Colors.grey,
+                  child: const Icon(Icons.error),
+                ),
               ),
             ),
-            SizedBox(height: 20),
-            _buildInfoTile("Capital", country.capital),
-            _buildInfoTile("Região", country.region),
-            _buildInfoTile("População", country.population.toString()),
-            _buildInfoTile("Moeda", country.currency),
+            const SizedBox(height: 20),
+            Text(
+              'Capital: ${country.capital}',
+              key: const Key('capital_text'),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Região: ${country.region}',
+              key: const Key('region_text'),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'População: ${country.population}',
+              key: const Key('population_text'),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Moeda: ${country.currency}',
+              key: const Key('currency_text'),
+            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildInfoTile(String label, String value) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 8),
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Text(
-            '$label: ',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(fontSize: 16),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
       ),
     );
   }

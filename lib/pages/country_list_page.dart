@@ -5,17 +5,25 @@ import '../services/pais_service.dart';
 import 'country_detail_page.dart';
 
 class CountryListPage extends StatefulWidget {
+  final PaisService? service;
+
+  const CountryListPage({Key? key, this.service}) : super(key: key);
+
   @override
-  _CountryListPageState createState() => _CountryListPageState();
+  CountryListPageState createState() => CountryListPageState(service: service);
 }
 
-class _CountryListPageState extends State<CountryListPage> {
-  List<Country> _allCountries = [];
-  int _currentPage = 0;
-  final int _perPage = 10;
-  final PaisService _paisService = PaisService(client: http.Client());
-  bool _isLoading = true;
-  String? _errorMessage;
+class CountryListPageState extends State<CountryListPage> {
+  List<Country> allCountries = [];
+  int currentPage = 0;
+  final int perPage = 10;
+  late final PaisService paisService;
+  bool isLoading = true;
+  String? errorMessage;
+
+  CountryListPageState({PaisService? service}) {
+    paisService = service ?? PaisService(client: http.Client());
+  }
 
   @override
   void initState() {
@@ -25,40 +33,40 @@ class _CountryListPageState extends State<CountryListPage> {
 
   Future<void> _fetchCountries() async {
     try {
-      final countries = await _paisService.listarPaises();
+      final countries = await paisService.listarPaises();
       setState(() {
-        _allCountries = countries;
-        _isLoading = false;
+        allCountries = countries;
+        isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Erro ao carregar países: ${e.toString()}';
-        _isLoading = false;
+        errorMessage = 'Erro ao carregar países: ${e.toString()}';
+        isLoading = false;
       });
     }
   }
 
-  List<Country> get _pagedCountries {
-    final start = _currentPage * _perPage;
-    final end = (_currentPage + 1) * _perPage;
-    return _allCountries.sublist(
+  List<Country> get pagedCountries {
+    final start = currentPage * perPage;
+    final end = (currentPage + 1) * perPage;
+    return allCountries.sublist(
       start,
-      end > _allCountries.length ? _allCountries.length : end,
+      end > allCountries.length ? allCountries.length : end,
     );
   }
 
-  void _nextPage() {
-    if ((_currentPage + 1) * _perPage < _allCountries.length) {
+  void nextPage() {
+    if ((currentPage + 1) * perPage < allCountries.length) {
       setState(() {
-        _currentPage++;
+        currentPage++;
       });
     }
   }
 
-  void _previousPage() {
-    if (_currentPage > 0) {
+  void previousPage() {
+    if (currentPage > 0) {
       setState(() {
-        _currentPage--;
+        currentPage--;
       });
     }
   }
@@ -66,42 +74,54 @@ class _CountryListPageState extends State<CountryListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Países do Mundo'), centerTitle: true),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(child: Text(_errorMessage!))
+      appBar: AppBar(
+        key: const Key('country_list_app_bar'),
+        title: const Text('Países do Mundo'), 
+        centerTitle: true
+      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator(key: const Key('loading_indicator')))
+          : errorMessage != null
+              ? Center(child: Text(errorMessage!))
               : Column(
                   children: [
                     Expanded(
                       child: ListView.builder(
-                        itemCount: _pagedCountries.length,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
+                        key: const Key('country_list_view'),
+                        itemCount: pagedCountries.length,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         itemBuilder: (context, index) {
-                          final country = _pagedCountries[index];
+                          final country = pagedCountries[index];
                           return Card(
+                            key: Key('country_card_${country.name}'),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                             elevation: 3,
-                            margin: EdgeInsets.symmetric(vertical: 8),
+                            margin: const EdgeInsets.symmetric(vertical: 8),
                             child: ListTile(
-                              contentPadding: EdgeInsets.all(12),
-                              leading: ClipRRect(
-                                borderRadius: BorderRadius.circular(6),
-                                child: Image.network(
-                                  country.flagUrl,
-                                  width: 60,
-                                  height: 40,
-                                  fit: BoxFit.cover,
+                              key: Key('country_tile_${country.name}'),
+                              contentPadding: const EdgeInsets.all(12),
+                              leading: SizedBox(
+                                width: 60,
+                                height: 40,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Image.network(
+                                    country.flagUrl,
+                                    fit: BoxFit.cover,
+                                    key: Key('country_list_flag_${country.name}'),
+                                    errorBuilder: (context, error, stackTrace) => Container(
+                                      color: Colors.grey,
+                                      child: const Icon(Icons.error),
+                                    ),
+                                  ),
                                 ),
                               ),
                               title: Text(
                                 country.name,
-                                style: TextStyle(
+                                key: Key('country_name_${country.name}'),
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
                                 ),
@@ -122,19 +142,23 @@ class _CountryListPageState extends State<CountryListPage> {
                     Padding(
                       padding: const EdgeInsets.all(12),
                       child: Row(
+                        key: const Key('pagination_controls'),
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           ElevatedButton(
-                            onPressed: _previousPage,
-                            child: Text('Anteriores'),
+                            key: const Key('previous_page_button'),
+                            onPressed: previousPage,
+                            child: const Text('Anteriores'),
                           ),
                           Text(
-                            'Página ${_currentPage + 1}',
-                            style: TextStyle(fontSize: 16),
+                            'Página ${currentPage + 1}',
+                            key: const Key('page_number_text'),
+                            style: const TextStyle(fontSize: 16),
                           ),
                           ElevatedButton(
-                            onPressed: _nextPage,
-                            child: Text('Próximos'),
+                            key: const Key('next_page_button'),
+                            onPressed: nextPage,
+                            child: const Text('Próximos'),
                           ),
                         ],
                       ),

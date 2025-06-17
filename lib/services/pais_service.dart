@@ -1,13 +1,17 @@
+// services/pais_service.dart
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/country.dart';
 
+/// Serviço para buscar dados de países da API REST Countries
 class PaisService {
   static const String _baseUrl = 'https://restcountries.com/v3.1/independent?status=true&fields=capital,name,flags,population,region,currencies,png';
   final http.Client client;
 
   PaisService({required this.client});
 
+  /// Busca todos os países da API
   Future<List<Country>> listarPaises() async {
     try {
       final response = await client.get(
@@ -26,6 +30,7 @@ class PaisService {
     }
   }
 
+  /// Busca um país pelo nome
   Future<Country?> buscarPaisPorNome(String nome) async {
     try {
       final response = await client.get(

@@ -1,3 +1,6 @@
+// models/country.dart
+
+/// Modelo que representa um país com suas informações básicas
 class Country {
   final String name;
   final String flagUrl;
@@ -15,7 +18,9 @@ class Country {
     required this.currency,
   });
 
+  /// Construtor factory para criar um Country a partir de JSON
   factory Country.fromJson(Map<String, dynamic> json) {
+    /// Função auxiliar para extrair o nome da moeda
     String getCurrencyName(Map<String, dynamic> currenciesJson) {
       if (currenciesJson.isEmpty) return 'N/A';
       final firstKey = currenciesJson.keys.first;

@@ -1,14 +1,12 @@
 // test/country_test.dart
 
 import 'dart:async';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:http/http.dart' as http;
 import 'package:paizes/models/country.dart';
 import 'package:paizes/services/pais_service.dart';
-
 import 'country_test.mocks.dart';
 
 @GenerateMocks([PaisService, http.Client])
@@ -19,6 +17,7 @@ void main() {
     mockPaisService = MockPaisService();
   });
 
+  // Cenários de teste para listagem de países com sucesso
   group('Cenário 01 – Listagem bem-sucedida', () {
     final mockCountries = [
       Country(
@@ -40,8 +39,9 @@ void main() {
     ];
 
     test('Deve retornar lista de países não vazia', () async {
-      when(mockPaisService.listarPaises())
-          .thenAnswer((_) async => mockCountries);
+      when(
+        mockPaisService.listarPaises(),
+      ).thenAnswer((_) async => mockCountries);
 
       final result = await mockPaisService.listarPaises();
 
@@ -50,8 +50,9 @@ void main() {
     });
 
     test('Deve retornar o primeiro país correto com campos válidos', () async {
-      when(mockPaisService.listarPaises())
-          .thenAnswer((_) async => mockCountries);
+      when(
+        mockPaisService.listarPaises(),
+      ).thenAnswer((_) async => mockCountries);
 
       final result = await mockPaisService.listarPaises();
       final firstCountry = result.first;
@@ -63,15 +64,16 @@ void main() {
     });
   });
 
+  // Cenários de teste para erros na API
   group('Cenário 02 – Erro na requisição de países', () {
     test('Deve lançar exceção quando a API falha', () async {
-      when(mockPaisService.listarPaises())
-          .thenThrow(Exception('Erro na API'));
+      when(mockPaisService.listarPaises()).thenThrow(Exception('Erro na API'));
 
       expect(() => mockPaisService.listarPaises(), throwsException);
     });
   });
 
+  // Cenários de teste para busca por nome
   group('Cenário 03 – Busca de país por nome com resultado', () {
     final mockCountry = Country(
       name: 'Japão',
@@ -83,8 +85,9 @@ void main() {
     );
 
     test('Deve retornar país não nulo com dados corretos', () async {
-      when(mockPaisService.buscarPaisPorNome('Japão'))
-          .thenAnswer((_) async => mockCountry);
+      when(
+        mockPaisService.buscarPaisPorNome('Japão'),
+      ).thenAnswer((_) async => mockCountry);
 
       final result = await mockPaisService.buscarPaisPorNome('Japão');
 
@@ -95,10 +98,12 @@ void main() {
     });
   });
 
+  // Cenários de teste para busca sem resultados
   group('Cenário 04 – Busca de país por nome com resultado vazio', () {
     test('Deve retornar null quando país não existe', () async {
-      when(mockPaisService.buscarPaisPorNome('Atlântida'))
-          .thenAnswer((_) async => null);
+      when(
+        mockPaisService.buscarPaisPorNome('Atlântida'),
+      ).thenAnswer((_) async => null);
 
       final result = await mockPaisService.buscarPaisPorNome('Atlântida');
 
@@ -106,14 +111,18 @@ void main() {
     });
 
     test('Deve lançar erro controlado quando país não existe', () async {
-      when(mockPaisService.buscarPaisPorNome('Atlântida'))
-          .thenThrow(CountryNotFoundException('País não encontrado'));
+      when(
+        mockPaisService.buscarPaisPorNome('Atlântida'),
+      ).thenThrow(CountryNotFoundException('País não encontrado'));
 
-      expect(() => mockPaisService.buscarPaisPorNome('Atlântida'),
-          throwsA(isA<CountryNotFoundException>()));
+      expect(
+        () => mockPaisService.buscarPaisPorNome('Atlântida'),
+        throwsA(isA<CountryNotFoundException>()),
+      );
     });
   });
 
+  // Cenários de teste para dados incompletos
   group('Cenário 05 – País com dados incompletos', () {
     test('Deve lidar com país sem capital', () async {
       final mockCountry = Country(
@@ -125,8 +134,9 @@ void main() {
         currency: 'Dólar australiano',
       );
 
-      when(mockPaisService.buscarPaisPorNome('Nauru'))
-          .thenAnswer((_) async => mockCountry);
+      when(
+        mockPaisService.buscarPaisPorNome('Nauru'),
+      ).thenAnswer((_) async => mockCountry);
 
       final result = await mockPaisService.buscarPaisPorNome('Nauru');
 
@@ -143,8 +153,9 @@ void main() {
         currency: 'Euro',
       );
 
-      when(mockPaisService.buscarPaisPorNome('Vaticano'))
-          .thenAnswer((_) async => mockCountry);
+      when(
+        mockPaisService.buscarPaisPorNome('Vaticano'),
+      ).thenAnswer((_) async => mockCountry);
 
       final result = await mockPaisService.buscarPaisPorNome('Vaticano');
 
@@ -152,6 +163,7 @@ void main() {
     });
   });
 
+  // Cenários de teste para verificação de chamadas
   group('Cenário 06 – Verificar chamada ao método', () {
     test('Deve verificar se listarPaises() foi chamado', () async {
       when(mockPaisService.listarPaises()).thenAnswer((_) async => []);
@@ -161,26 +173,33 @@ void main() {
       verify(mockPaisService.listarPaises()).called(1);
     });
 
-    test('Deve verificar se buscarPaisPorNome() foi chamado com parâmetro correto', () async {
-      when(mockPaisService.buscarPaisPorNome('Canadá')).thenAnswer((_) async => null);
+    test(
+      'Deve verificar se buscarPaisPorNome() foi chamado com parâmetro correto',
+      () async {
+        when(
+          mockPaisService.buscarPaisPorNome('Canadá'),
+        ).thenAnswer((_) async => null);
 
-      await mockPaisService.buscarPaisPorNome('Canadá');
+        await mockPaisService.buscarPaisPorNome('Canadá');
 
-      verify(mockPaisService.buscarPaisPorNome('Canadá')).called(1);
-    });
+        verify(mockPaisService.buscarPaisPorNome('Canadá')).called(1);
+      },
+    );
   });
 
-  // CENÁRIOS OPCIONAIS (EXTRA)
+  // Cenários opcionais de teste
   group('Cenário 07 – Simular lentidão da API', () {
     test('Deve lidar com atraso na resposta', () async {
-      final mockCountries = [Country(
-        name: 'Austrália',
-        flagUrl: 'https://flagcdn.com/au.svg',
-        capital: 'Canberra',
-        population: 25687041,
-        region: 'Oceania',
-        currency: 'Dólar australiano',
-      )];
+      final mockCountries = [
+        Country(
+          name: 'Austrália',
+          flagUrl: 'https://flagcdn.com/au.svg',
+          capital: 'Canberra',
+          population: 25687041,
+          region: 'Oceania',
+          currency: 'Dólar australiano',
+        ),
+      ];
 
       when(mockPaisService.listarPaises()).thenAnswer((_) async {
         await Future.delayed(Duration(seconds: 2));
@@ -188,10 +207,9 @@ void main() {
       });
 
       final future = mockPaisService.listarPaises();
-      
-      // Verifica se ainda está carregando
+
       expect(future, isA<Future<List<Country>>>());
-      
+
       final result = await future;
       expect(result, isNotEmpty);
     });
@@ -207,7 +225,7 @@ void main() {
         region: 'Europe',
         currency: 'Euro',
       );
-      
+
       final mockJapan = Country(
         name: 'Japão',
         flagUrl: 'https://flagcdn.com/jp.svg',
@@ -217,15 +235,19 @@ void main() {
         currency: 'Yen',
       );
 
-      when(mockPaisService.buscarPaisPorNome('Itália')).thenAnswer((_) async => mockItaly);
-      when(mockPaisService.buscarPaisPorNome('Japão')).thenAnswer((_) async => mockJapan);
+      when(
+        mockPaisService.buscarPaisPorNome('Itália'),
+      ).thenAnswer((_) async => mockItaly);
+      when(
+        mockPaisService.buscarPaisPorNome('Japão'),
+      ).thenAnswer((_) async => mockJapan);
 
       final italy = await mockPaisService.buscarPaisPorNome('Itália');
       final japan = await mockPaisService.buscarPaisPorNome('Japão');
 
       expect(italy?.name, 'Itália');
       expect(japan?.name, 'Japão');
-      
+
       verifyInOrder([
         mockPaisService.buscarPaisPorNome('Itália'),
         mockPaisService.buscarPaisPorNome('Japão'),
@@ -242,27 +264,33 @@ void main() {
           capital: 'Brasília',
           population: 213993437,
           region: 'Americas',
-          currency: 'Real'),
+          currency: 'Real',
+        ),
         Country(
           name: 'Argentina',
           flagUrl: 'https://flagcdn.com/ar.svg',
           capital: 'Buenos Aires',
           population: 45376763,
           region: 'Americas',
-          currency: 'Peso argentino'),
+          currency: 'Peso argentino',
+        ),
         Country(
           name: 'Japão',
           flagUrl: 'https://flagcdn.com/jp.svg',
           capital: 'Tóquio',
           population: 125836021,
           region: 'Asia',
-          currency: 'Yen'),
+          currency: 'Yen',
+        ),
       ];
 
-      when(mockPaisService.listarPaises()).thenAnswer((_) async => mockCountries);
+      when(
+        mockPaisService.listarPaises(),
+      ).thenAnswer((_) async => mockCountries);
 
       final result = await mockPaisService.listarPaises();
-      final americasCountries = result.where((c) => c.region == 'Americas').toList();
+      final americasCountries =
+          result.where((c) => c.region == 'Americas').toList();
 
       expect(americasCountries, hasLength(2));
       expect(americasCountries[0].name, 'Brasil');
@@ -271,10 +299,11 @@ void main() {
   });
 }
 
+/// Exceção customizada para país não encontrado
 class CountryNotFoundException implements Exception {
   final String message;
   CountryNotFoundException(this.message);
-  
+
   @override
   String toString() => message;
 }
