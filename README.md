@@ -11,3 +11,7 @@
 
 ### Rodando os testes
 ![Rodando os testes](https://github.com/user-attachments/assets/92b0902a-8ca5-4f6a-8a79-6f7ae0645080)
+
+### Todos os testes
+![image](https://github.com/user-attachments/assets/ed185f41-1f56-4841-a3ec-95e7e2b41bdc)
+
